@@ -60,44 +60,34 @@ class Adapter {
     })
   }
 
-  createBucket (filename /* : string */) /* : Promise<any> */ {
-    return new Promise((resolve, reject) => {
-      this.minio.bucketExists(this.bucket(filename)).then(resolve).catch(_ => {
-        this.minio.makeBucket(this.bucket(filename), this.region).then(resolve).catch(reject)
-      })
+  async createBucket (filename /* : string */) /* : Promise<any> */ {
+    const exist = await this.minio.bucketExists(this.bucket(filename))
+    if (!exist) {
+      return this.minio.makeBucket(this.bucket(filename), this.region)
+    }
+  }
+
+  async createFile (name /* : string */, data /* : string|Buffer */, contentType /* : string */) /* : Promise<any> */ {
+    await this.createBucket(name)
+    return this.minio.putObject(this.bucket(name), this.prefix(name), data, {
+      'Content-Type': contentType
     })
-    // return this.minio.bucketExists(this.bucket(filename))
-    //   .catch(() => this.minio.makeBucket(this.bucket(filename), this.region))
   }
 
-  createFile (
-    name /* : string */,
-    data /* : string|Buffer */,
-    contentType /* : string */
-  ) /* : Promise<any> */ {
-    return this.createBucket(name)
-      .then(() => this.minio.putObject(
-        this.bucket(name),
-        this.prefix(name),
-        data,
-        contentType
-      ))
+  async deleteFile (name /* : string */) /* : Promise<any> */ {
+    await this.createBucket(name)
+    return this.minio.removeObject(this.bucket(name), this.prefix(name))
   }
 
-  deleteFile (name /* : string */) /* : Promise<any> */ {
-    return this.createBucket(name)
-      .then(() => this.minio.removeObject(this.bucket(name), this.prefix(name)))
-  }
-
-  getFileData (name /* : string */) /* : Promise<Buffer> */ {
-    return this.createBucket(name)
-      .then(() => this.minio.getObject(this.bucket(name), this.prefix(name)))
-      .then((stream) => new Promise((resolve, reject) => {
-        const buflist = []
-        stream.on('error', reject)
-        stream.on('data', (chunk) => buflist.push(bufferFrom(chunk)))
-        stream.on('end', () => resolve(Buffer.concat(buflist)))
-      }))
+  async getFileData (name /* : string */) /* : Promise<Buffer> */ {
+    await this.createBucket(name)
+    const stream = await this.minio.getObject(this.bucket(name), this.prefix(name))
+    return new Promise((resolve, reject) => {
+      const buflist = []
+      stream.on('error', reject)
+      stream.on('data', (chunk) => buflist.push(bufferFrom(chunk)))
+      stream.on('end', () => resolve(Buffer.concat(buflist)))
+    })
   }
 
   getFileLocation (config /* : Object */, name /* : string */) /* : string */ {
