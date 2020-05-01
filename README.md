@@ -1,8 +1,8 @@
 # Parse Server: S3-like storage adapter
 
-[![npm](https://img.shields.io/npm/v/parse-server-s3like-adapter.svg?style=flat-square)](https://www.npmjs.com/package/parse-server-s3like-adapter)
+[![npm](https://img.shields.io/npm/v/bfast-s3like.svg?style=flat-square)](https://www.npmjs.com/package/parse-server-s3like-adapter)
 [![Travis](https://img.shields.io/travis/mckay-software/parse-server-s3like-adapter.svg?style=flat-square)](https://travis-ci.org/mckay-software/parse-server-s3like-adapter)
-[![Coveralls](https://img.shields.io/coveralls/mckay-software/parse-server-s3like-adapter.svg?style=flat-square)](https://coveralls.io/github/mckay-software/parse-server-s3like-adapter)
+[![Coveralls](https://img.shields.io/coveralls/fahamutech/parse-server-s3like-adapter.svg?style=flat-square)](https://coveralls.io/github/mckay-software/parse-server-s3like-adapter)
 [![License](https://img.shields.io/badge/license-ISC-blue.svg?style=flat-square)](https://spdx.org/licenses/ISC.html)
 
 Based on [Minio's client](https://docs.minio.io/docs/javascript-client-quickstart-guide).
@@ -14,18 +14,18 @@ If you want to:
 ## Install
 
 ```
-$ npm install --save parse-server-s3like-adapter
+$ npm install --save bfast-s3like
 ```
 
 ## Usage
 
 ```js
 filesAdapter: {
-  module: 'parse-server-s3like-adapter',
+  module: 'bfast-s3like',
   options: {
     accessKey: 'accessKey',
     bucket: 'my_bucket',
-    direct: true,
+    useSSL: true,
     endPoint: 'https://...',
     secretKey: 'secretKey'
   }
@@ -42,4 +42,4 @@ filesAdapter: {
 | `prefix` | `''` | A prefix to apply to all filenames. Can be set to e.g. `'foo/'` to put all files in a subdirectory. This can be a function that takes the filename and returns a string. |
 | `region` | `'us-east-1'` | May not actually matter for some services, refer to your documentation. This can be a function that takes the filename and returns a string. |
 | `secretKey` | **required** ||
-| `secure` | From `endPoint` | Override whether the connection is secure or not. By default is parsed from the `endPoint` URL (`https` is secure, otherwise not). |
+| `useSSL` | From `endPoint` | Override whether the connection is secure or not. By default is parsed from the `endPoint` URL (`https` is secure, otherwise not). |

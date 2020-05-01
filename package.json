@@ -1,6 +1,6 @@
 {
-  "name": "parse-server-s3like-adapter",
-  "version": "2.0.1",
+  "name": "bfast-s3like",
+  "version": "0.0.1",
   "description": "AWS S3-like adapter for parse-server",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mckay-software/parse-server-s3like-adapter.git"
+    "url": "git+https://github.com/fahamutech/bfast-s3like.git"
   },
   "keywords": [
     "parse-server",
@@ -25,18 +25,17 @@
   "author": "McKay Software",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mckay-software/parse-server-s3like-adapter/issues"
+    "url": "https://github.com/fahamutech/bfast-s3like/issues"
   },
-  "homepage": "https://github.com/mckay-software/parse-server-s3like-adapter#readme",
+  "homepage": "https://github.com/fahamutech/bfast-s3like#readme",
   "dependencies": {
-    "minio": "^2.0.0",
-    "thenify-all": "^1.6.0",
-    "url-join": "^1.1.0"
+    "minio": "^7.0.16",
+    "url-join": "^4.0.1"
   },
   "devDependencies": {
-    "flow-bin": "^0.32.0",
-    "mz": "^2.4.0",
-    "standard": "^7.1.2",
-    "tap": "^7.1.2"
+    "@types/minio": "^7.0.5",
+    "flow-bin": "^0.123.0",
+    "standard": "^14.3.3",
+    "tap": "^14.10.7"
   }
 }

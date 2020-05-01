@@ -2,7 +2,10 @@
 logs
 *.log
 npm-debug.log*
-
+.idea
+.vscode
+.nyc_output
+/.nyc_output
 # Runtime data
 pids
 *.pid

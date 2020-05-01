@@ -4,7 +4,6 @@
 const assert = require('assert')
 const bufferFrom /* : (b: string|Buffer) => Buffer */ = require('./buffer-from')
 const Minio = require('minio')
-const thenifyAll = require('thenify-all')
 const url = require('url')
 const urljoin = require('url-join')
 
@@ -18,6 +17,7 @@ class Adapter {
   /* :: minio: Minio; */
   /* :: prefix: (name: string) => string; */
   /* :: region: string; */
+
   /* :: secretKey: string; */
 
   constructor (options /* : Object */ = {}) {
@@ -33,36 +33,41 @@ class Adapter {
     assert(secretKey, 'Argument required: secretKey')
 
     // Needs the required() check for `endPoint` to have run
-    const ep = url.parse(endPoint)
-    const { secure = ep.protocol === 'https:' } = options
+    const ep = new url.URL(endPoint)
+    const { useSSL = ep.protocol === 'https:' } = options
 
-    // Needs `secure`, whether it's provided or defaulted
-    const { port = ep.port ? +ep.port : (secure ? 443 : 80) } = options
+    // Needs `useSSL`, whether it's provided or defaulted
+    const { port = ep.port ? +ep.port : (useSSL ? 443 : 80) } = options
 
     Object.assign(this, { endPoint, region: `${region}` })
-    Object.assign(this, { bucket: typeof bucket === 'function'
-      ? bucket : () => `${bucket}` })
-    Object.assign(this, { direct: typeof direct === 'function'
-      ? direct : () => !!direct })
-    Object.assign(this, { prefix: typeof prefix === 'function'
-      ? prefix : (name) => `${prefix}${name}` })
-
-    this.minio = new Minio({
-      endPoint: ep.hostname, accessKey, secretKey, secure, port
+    Object.assign(this, {
+      bucket: typeof bucket === 'function'
+        ? bucket : () => {
+          return `${bucket}`
+        }
+    })
+    Object.assign(this, {
+      direct: typeof direct === 'function'
+        ? direct : () => !!direct
+    })
+    Object.assign(this, {
+      prefix: typeof prefix === 'function'
+        ? prefix : (name) => `${prefix}${name}`
     })
 
-    thenifyAll(this.minio, this.minio, [
-      'bucketExists',
-      'getObject',
-      'makeBucket',
-      'putObject',
-      'removeObject'
-    ])
+    this.minio = new Minio.Client({
+      endPoint: ep.hostname, accessKey, secretKey, useSSL, port
+    })
   }
 
   createBucket (filename /* : string */) /* : Promise<any> */ {
-    return this.minio.bucketExists(this.bucket(filename))
-    .catch(() => this.minio.makeBucket(this.bucket(filename), this.region))
+    return new Promise((resolve, reject) => {
+      this.minio.bucketExists(this.bucket(filename)).then(resolve).catch(_ => {
+        this.minio.makeBucket(this.bucket(filename), this.region).then(resolve).catch(reject)
+      })
+    })
+    // return this.minio.bucketExists(this.bucket(filename))
+    //   .catch(() => this.minio.makeBucket(this.bucket(filename), this.region))
   }
 
   createFile (
@@ -71,34 +76,34 @@ class Adapter {
     contentType /* : string */
   ) /* : Promise<any> */ {
     return this.createBucket(name)
-    .then(() => this.minio.putObject(
-      this.bucket(name),
-      this.prefix(name),
-      data,
-      contentType
-    ))
+      .then(() => this.minio.putObject(
+        this.bucket(name),
+        this.prefix(name),
+        data,
+        contentType
+      ))
   }
 
   deleteFile (name /* : string */) /* : Promise<any> */ {
     return this.createBucket(name)
-    .then(() => this.minio.removeObject(this.bucket(name), this.prefix(name)))
+      .then(() => this.minio.removeObject(this.bucket(name), this.prefix(name)))
   }
 
   getFileData (name /* : string */) /* : Promise<Buffer> */ {
     return this.createBucket(name)
-    .then(() => this.minio.getObject(this.bucket(name), this.prefix(name)))
-    .then((stream) => new Promise((resolve, reject) => {
-      const buflist = []
-      stream.on('error', reject)
-      stream.on('data', (chunk) => buflist.push(bufferFrom(chunk)))
-      stream.on('end', () => resolve(Buffer.concat(buflist)))
-    }))
+      .then(() => this.minio.getObject(this.bucket(name), this.prefix(name)))
+      .then((stream) => new Promise((resolve, reject) => {
+        const buflist = []
+        stream.on('error', reject)
+        stream.on('data', (chunk) => buflist.push(bufferFrom(chunk)))
+        stream.on('end', () => resolve(Buffer.concat(buflist)))
+      }))
   }
 
   getFileLocation (config /* : Object */, name /* : string */) /* : string */ {
     const parts = this.direct(name)
       ? [this.endPoint, this.bucket(name), this.prefix(name)]
-      : [config.mount, 'files', config.applicationId, encodeURIComponent(name)]
+      : [config.mount ? config.mount : '/', 'files', config.applicationId ? config.applicationId : '', encodeURIComponent(name)]
     return urljoin(...parts)
   }
 }
