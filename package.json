@@ -1,6 +1,6 @@
 {
   "name": "bfast-s3like",
-  "version": "0.0.1",
+  "version": "2.1.0",
   "description": "AWS S3-like adapter for parse-server",
   "main": "index.js",
   "scripts": {

@@ -1,9 +1,5 @@
 # Parse Server: S3-like storage adapter
 
-[![npm](https://img.shields.io/npm/v/bfast-s3like.svg?style=flat-square)](https://www.npmjs.com/package/parse-server-s3like-adapter)
-[![Travis](https://img.shields.io/travis/mckay-software/parse-server-s3like-adapter.svg?style=flat-square)](https://travis-ci.org/mckay-software/parse-server-s3like-adapter)
-[![Coveralls](https://img.shields.io/coveralls/fahamutech/parse-server-s3like-adapter.svg?style=flat-square)](https://coveralls.io/github/mckay-software/parse-server-s3like-adapter)
-[![License](https://img.shields.io/badge/license-ISC-blue.svg?style=flat-square)](https://spdx.org/licenses/ISC.html)
 
 Based on [Minio's client](https://docs.minio.io/docs/javascript-client-quickstart-guide).
 

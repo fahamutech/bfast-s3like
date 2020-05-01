@@ -7,5 +7,5 @@ module.exports = {
   port: 9000,
   accessKey: config.access,
   secretKey: config.secret,
-  bucket: 'Joshua'.toLowerCase() // crypto.randomBytes(6).toString('hex').toLowerCase()
+  bucket: 'joshua' // crypto.randomBytes(6).toString('hex').toLowerCase()
 }
